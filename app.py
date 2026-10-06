@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-from csv_parser import parse_csv_file, get_setting_value
+from csv_parser import parse_csv_file, generate_ini
 
 app = Flask(__name__)
 
@@ -18,6 +18,13 @@ def upload():
 
     content = file.read()
     rows = parse_csv_file(content)
+    
+    ini_content = generate_ini(rows)
+
+    return jsonify({
+        "filename": file.filename,
+        "ini_text": ini_content
+    })
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
