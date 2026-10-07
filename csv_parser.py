@@ -26,6 +26,15 @@ def get_setting_value(rows, setting_label):
                         return next_cell
     return None
 
+def is_setting_mentioned(rows, setting):
+    for row in rows:
+        for cell in row:
+            cell_lower = cell.lower()
+            if setting in cell_lower:
+                return True
+
+    return False
+
 def get_av_section(rows):
     idle_led_raw = get_setting_value(rows, "Idle LED")
     beeper_raw = get_setting_value(rows, "Beeper")
@@ -49,16 +58,25 @@ def get_av_section(rows):
     
     return "\n".join(lines)
 
-def get_ble_section():
+def get_ble_section(rows):
+    setting_value = get_setting_value(rows, "BLE Functionality")
+    enabled = False if setting_value == 'Disabled' else True
+
     lines = [
-        '[ble]'
+        '[ble]',
+        f'enabled = {enabled}',
+        'connection_timeout_ms = 10000',
+        'allow_fw_updates = true'
     ]
     
     return "\n".join(lines) 
 
 def get_ble_adv_params_section():
     lines = [
-        '[ble/adv_params]'
+        '[ble/adv_params]',
+        'interval_min = 48',
+        'interval_max = 96',
+        'options = 0x0001'
     ]
     
     return "\n".join(lines) 
@@ -72,14 +90,25 @@ def get_ble_adv_data_section():
 
 def get_ble_av_section():
     lines = [
-        '[ble/av]'
+        '[ble/av]',
+        'override_osdp_leds = true',
+        'color = "amber"',
+        'is_blinking = false',
+        'blinking_period = 0'
     ]
     
     return "\n".join(lines) 
 
-def get_ble_configure_section():
+def get_ble_configure_section(rows):
+    setting_value = get_setting_value(rows, "BLE Functionality")
+    enabled = True if "Admin" in setting_value else False
+
     lines = [
-        '[ble/configure]'
+        '[ble/configure]',
+        f'secure_transactions = {enabled}',
+        'allow_credentials = false',
+        'bcd_credentials = false',
+        'admin_timeout_s = 60'
     ]
     
     return "\n".join(lines) 
@@ -147,9 +176,32 @@ def get_mfg_data_section():
     
     return "\n".join(lines) 
 
-def get_mypass_section():
+def get_mypass_section(rows):
+    setting_value = get_setting_value(rows, "BLE Functionality")
+    enabled = False
+    km1_se_slot_nb = 0
+    km2_se_slot_nb = 0
+    kc1_se_slot_nb = 0
+    kc2_se_slot_nb = 0
+
+    if setting_value and 'Credentials' in setting_value:
+        enabled = True
+        km1_se_slot_nb = '03'
+        km2_se_slot_nb = '13'
+        kc1_se_slot_nb = '04'
+        kc2_se_slot_nb = '14'
+
     lines = [
         '[mypass]',
+        f'allow_credentials = {enabled}',
+        'bcd_credentials = false',
+        f'km1_se_slot_nb = {km1_se_slot_nb}',
+        f'km2_se_slot_nb = {km2_se_slot_nb}',
+        f'kc1_se_slot_nb = {kc1_se_slot_nb}',
+        f'kc2_se_slot_nb = {kc2_se_slot_nb}',
+        'allow_keys = true',
+        'metadata = "00000000"',
+        'allow_key_rolling = true'
     ]
     
     return "\n".join(lines) 
@@ -192,7 +244,7 @@ def get_rfid_section():
     
     return "\n".join(lines)
 
-def get_rfid_av_section():
+def get_rfid_av_section(rows):
     lines = [
         '[rfid/av]',
     ]
@@ -320,9 +372,13 @@ def get_rfid_hf_app_mifare_2go_generic_section():
     
     return "\n".join(lines)
 
-def get_rfid_hf_app_mypass_section():
+def get_rfid_hf_app_mypass_section(rows):
+    setting_value = get_setting_value(rows, "BLE Functionality")
+    enabled = True if setting_value else False
+
     lines = [
         '[rfid/hf/app/mypass]',
+        f'enabled = {enabled}'
     ]
     
     return "\n".join(lines)
@@ -341,16 +397,46 @@ def get_rfid_hf_app_pkoc_section():
     
     return "\n".join(lines)
 
-def get_rfid_hf_app_smartmax_classic_section():
+def get_rfid_hf_app_smartmax_classic_section(rows):
+    enabled = False
+    se_key_nb = 0
+    setting_values = ['smartmax classic', 'smartmax mfc', 'classic smartmax', 'mfc/mfd smartmax']
+
+    for setting in setting_values:
+        if is_setting_mentioned(rows, setting):
+            enabled = True
+            break
+
+    if enabled:
+        se_key_nb = 30
+
     lines = [
         '[rfid/hf/app/smartmax/classic]',
+        f'enabled = {enabled}',
+        f'se_key_nb = {se_key_nb}',
+        'bcd_format = false'
     ]
     
     return "\n".join(lines)
 
-def get_rfid_hf_app_smartmax_desfire_section():
+def get_rfid_hf_app_smartmax_desfire_section(rows):
+    enabled = False
+    se_key_nb = 0
+    setting_values = ['smartmax desfire', 'smartmax mfd', 'desfire smartmax', 'mfc/mfd smartmax']
+
+    for setting in setting_values:
+        if is_setting_mentioned(rows, setting):
+            enabled = True
+            break
+
+    if enabled:
+        se_key_nb = 31
+
     lines = [
         '[rfid/hf/app/smartmax/desfire]',
+        f'enabled = {enabled}',
+        f'se_key_nb = {se_key_nb}',
+        'bcd_format = false'
     ]
     
     return "\n".join(lines)
@@ -390,16 +476,35 @@ def get_rfid_hf_app_visa_section():
     
     return "\n".join(lines)
 
-def get_rfid_hf_app_wallet_section():
+def get_rfid_hf_app_wallet_section(rows):
+    setting_value = get_setting_value(rows, "ECP TCI")
+    terminal_id = setting_value if setting_value else "000000"
+
     lines = [
         '[rfid/hf/app/wallet]',
+        f'terminal_id = "{terminal_id}"',
+        'selected_format = 0x2',
+        'terminal_mode = 0x0',
+        'terminal_info = 0xC3',
+        'terminal_type = 0x02',
+        'terminal_subtype = 0x2'
     ]
     
     return "\n".join(lines)
 
-def get_tamper_section():
+def get_tamper_section(rows):
+    setting_value = get_setting_value(rows, "Tamper Monitoring")
+    enabled = True if setting_value == 'On' else False
+
     lines = [
         '[tamper]',
+        f'wiegand_reporting_enabled = {enabled}',
+        f'osdp_reporting_enabled = {enabled}',
+        'beeper_during_osdp_enabled = false',
+        'report_state_change_only_enabled = true',
+        'num_reads_enter_active = 5',
+        'num_reads_enter_inactive = 25',
+        'sample_frequency_ms = 200'
     ]
     
     return "\n".join(lines)
@@ -415,9 +520,27 @@ def get_tamper_accel_section():
     
     return "\n".join(lines)
 
-def get_wiegand_section():
+def get_wiegand_section(rows):
+    setting_value = get_setting_value(rows, "Keypad Format")
+    default_format_values = {
+        '4-bit':'4_bit',
+        '8-bit':'8_bit',
+        'buffered 26-bit':'26_bit',
+        'Magstripe - 4 digit':'magstripe_4',
+        'Magstripe - 5 digit':'magstripe_5'
+    }
+    default_format = default_format_values[setting_value]
+
     lines = [
         '[wiegand]',
+        'space_duration_us = 200',
+        'pulse_duration_us = 20',
+        'lines_inverted = false',
+        'red_ctrl_mode = "red"',
+        'green_ctrl_mode = "green"',
+        'buzzer_ctrl_mode = "buzzer"',
+        f'default_format = {default_format}',
+        'default_facility_code = 0'
     ]
     
     return "\n".join(lines)
@@ -426,13 +549,16 @@ def get_keys_section():
     lines = [
         '[keys]',
     ]
+
+    # smartmax classic -- slot30 = AMAG:MFC
+    # smartmax desfire -- slot31 = AMAG:USER_APP_READ_KEYSET
     
     return "\n".join(lines)
 
 def generate_ini(rows):
     sections = [
         get_av_section(rows),
-        get_ble_section(),
+        get_ble_section(rows),
         get_ble_adv_params_section(),
         get_ble_adv_data_section(),
         get_ble_av_section(),
@@ -442,11 +568,11 @@ def generate_ini(rows):
         get_keypad_section(),
         get_keypad_mullion_section(),
         get_mfg_data_section(),
-        get_mypass_section(),
+        get_mypass_section(rows),
         get_osdp_section(),
         get_osdp_comms_section(),
         get_rfid_section(),
-        get_rfid_av_section(),
+        get_rfid_av_section(rows),
         get_rfid_lf_section(),
         get_rfid_hf_nfc_section(),
         get_rfid_hf_app_allegion_android_section(),
@@ -464,20 +590,20 @@ def generate_ini(rows):
         get_rfid_hf_app_leaf_duox_openid_section(),
         get_rfid_hf_app_meridian_section(),
         get_rfid_hf_app_mifare_2go_generic_section(),
-        get_rfid_hf_app_mypass_section(),
+        get_rfid_hf_app_mypass_section(rows),
         get_rfid_hf_app_nexpacs_section(),
         get_rfid_hf_app_pkoc_section(),
-        get_rfid_hf_app_smartmax_classic_section(),
-        get_rfid_hf_app_smartmax_desfire_section(),
+        get_rfid_hf_app_smartmax_classic_section(rows),
+        get_rfid_hf_app_smartmax_desfire_section(rows),
         get_rfid_hf_app_software_house_classic_section(),
         get_rfid_hf_app_software_house_desfire_section(),
         get_rfid_hf_app_vanderbilt_classic_section(),
         get_rfid_hf_app_vanderbilt_desfire_section(),
         get_rfid_hf_app_visa_section(),
-        get_rfid_hf_app_wallet_section(),
-        get_tamper_section(),
+        get_rfid_hf_app_wallet_section(rows),
+        get_tamper_section(rows),
         get_tamper_accel_section(),
-        get_wiegand_section(),
+        get_wiegand_section(rows),
         get_keys_section()
     ]
     
