@@ -206,6 +206,229 @@ def get_rfid_lf_section():
     
     return "\n".join(lines)
 
+def get_rfid_hf_nfc_section():
+    lines = [
+        '[rfid/hf/nfc]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_rfid_hf_app_allegion_android_section():
+    lines = [
+        '[rfid/hf/app/allegion/android]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_rfid_hf_app_allegion_ios_section():
+    lines = [
+        '[rfid/hf/app/allegion/ios]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_rfid_hf_app_config_section():
+    lines = [
+        '[rfid/hf/app/config]',
+        'enabled = true',
+        'startup_timeout_s = 60'
+    ]
+    
+    return "\n".join(lines)
+
+def get_rfid_hf_app_csn_section():
+    lines = [
+        '[rfid/hf/app/csn]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_rfid_hf_app_dormakaba_section():
+    lines = [
+        '[rfid/hf/app/dormakaba]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_rfid_hf_app_fidelity_section():
+    lines = [
+        '[rfid/hf/app/fidelity]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_rfid_hf_app_iclass_section():
+    lines = [
+        '[rfid/hf/app/iclass]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_rfid_hf_app_leaf_desfire_section():
+    lines = [
+        '[rfid/hf/app/leaf/desfire]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_rfid_hf_app_leaf_desfire_one_section():
+    lines = [
+        '[rfid/hf/app/leaf/desfire/1]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_rfid_hf_app_leaf_desfire_two_section():
+    lines = [
+        '[rfid/hf/app/leaf/desfire/2]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_rfid_hf_app_leaf_desfire_three_section():
+    lines = [
+        '[rfid/hf/app/leaf/desfire/3]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_rfid_hf_app_leaf_desfire_four_section():
+    lines = [
+        '[rfid/hf/app/leaf/desfire/4]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_rfid_hf_app_leaf_duox_openid_section():
+    lines = [
+        '[rfid/hf/app/leaf/duox/openid]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_rfid_hf_app_meridian_section():
+    lines = [
+        '[rfid/hf/app/meridian]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_rfid_hf_app_mifare_2go_generic_section():
+    lines = [
+        '[rfid/hf/app/mifare_2go/generic]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_rfid_hf_app_mypass_section():
+    lines = [
+        '[rfid/hf/app/mypass]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_rfid_hf_app_nexpacs_section():
+    lines = [
+        '[rfid/hf/app/nexpacs]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_rfid_hf_app_pkoc_section():
+    lines = [
+        '[rfid/hf/app/pkoc]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_rfid_hf_app_smartmax_classic_section():
+    lines = [
+        '[rfid/hf/app/smartmax/classic]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_rfid_hf_app_smartmax_desfire_section():
+    lines = [
+        '[rfid/hf/app/smartmax/desfire]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_rfid_hf_app_software_house_classic_section():
+    lines = [
+        '[rfid/hf/app/software_house/classic]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_rfid_hf_app_software_house_desfire_section():
+    lines = [
+        '[rfid/hf/app/software_house/desfire]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_rfid_hf_app_vanderbilt_classic_section():
+    lines = [
+        '[rfid/hf/app/vanderbilt/classic]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_rfid_hf_app_vanderbilt_desfire_section():
+    lines = [
+        '[rfid/hf/app/vanderbilt/desfire]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_rfid_hf_app_visa_section():
+    lines = [
+        '[rfid/hf/app/visa]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_rfid_hf_app_wallet_section():
+    lines = [
+        '[rfid/hf/app/wallet]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_tamper_section():
+    lines = [
+        '[tamper]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_tamper_accel_section():
+    lines = [
+        '[tamper/accel]',
+        'sensitivity = "default"',
+        'x_axis_enabled = true',
+        'y_axis_enabled = true',
+        'z_axis_enabled = true'
+    ]
+    
+    return "\n".join(lines)
+
+def get_wiegand_section():
+    lines = [
+        '[wiegand]',
+    ]
+    
+    return "\n".join(lines)
+
+def get_keys_section():
+    lines = [
+        '[keys]',
+    ]
+    
+    return "\n".join(lines)
+
 def generate_ini(rows):
     sections = [
         get_av_section(rows),
@@ -224,7 +447,38 @@ def generate_ini(rows):
         get_osdp_comms_section(),
         get_rfid_section(),
         get_rfid_av_section(),
-        get_rfid_lf_section()
+        get_rfid_lf_section(),
+        get_rfid_hf_nfc_section(),
+        get_rfid_hf_app_allegion_android_section(),
+        get_rfid_hf_app_allegion_ios_section(),
+        get_rfid_hf_app_config_section(),
+        get_rfid_hf_app_csn_section(),
+        get_rfid_hf_app_dormakaba_section(),
+        get_rfid_hf_app_fidelity_section(),
+        get_rfid_hf_app_iclass_section(),
+        get_rfid_hf_app_leaf_desfire_section(),
+        get_rfid_hf_app_leaf_desfire_one_section(),
+        get_rfid_hf_app_leaf_desfire_two_section(),
+        get_rfid_hf_app_leaf_desfire_three_section(),
+        get_rfid_hf_app_leaf_desfire_four_section(),
+        get_rfid_hf_app_leaf_duox_openid_section(),
+        get_rfid_hf_app_meridian_section(),
+        get_rfid_hf_app_mifare_2go_generic_section(),
+        get_rfid_hf_app_mypass_section(),
+        get_rfid_hf_app_nexpacs_section(),
+        get_rfid_hf_app_pkoc_section(),
+        get_rfid_hf_app_smartmax_classic_section(),
+        get_rfid_hf_app_smartmax_desfire_section(),
+        get_rfid_hf_app_software_house_classic_section(),
+        get_rfid_hf_app_software_house_desfire_section(),
+        get_rfid_hf_app_vanderbilt_classic_section(),
+        get_rfid_hf_app_vanderbilt_desfire_section(),
+        get_rfid_hf_app_visa_section(),
+        get_rfid_hf_app_wallet_section(),
+        get_tamper_section(),
+        get_tamper_accel_section(),
+        get_wiegand_section(),
+        get_keys_section()
     ]
     
     return "\n\n".join(sections)
