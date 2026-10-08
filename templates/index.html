@@ -91,6 +91,36 @@
             background-color: var(--accent-hover);
         }
 
+        .output-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.5rem;
+        }
+
+        .output-header label {
+            margin-bottom: 0;
+        }
+
+        .output-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .output-actions button {
+            padding: 0.4rem 0.9rem;
+            font-size: 0.85rem;
+            background-color: transparent;
+            border-color: var(--border-color);
+        }
+
+        .output-actions button:hover {
+            background-color: var(--card-bg);
+            border-color: var(--accent-hover);
+        }
+
         #warningsList {
             margin: 0;
             padding-left: 1.25rem;
@@ -133,12 +163,47 @@
         </div>
 
         <div class="card" id="outputCard" style="display: none;">
-            <label id="outputHeader">Generated INI Content</label>
+            <div class="output-header">
+                <label id="outputHeader">Generated INI Content</label>
+                <div class="output-actions">
+                    <button type="button" id="copyButton">Copy</button>
+                    <button type="button" id="downloadButton">Download .ini</button>
+                </div>
+            </div>
             <pre id="iniOutput"></pre>
         </div>
     </div>
 
     <script>
+        let iniText = "";
+        let iniFilename = "settings.ini";
+
+        document.getElementById("copyButton").addEventListener("click", async (e) => {
+            const button = e.currentTarget;
+            try {
+                await navigator.clipboard.writeText(iniText);
+            } catch {
+                // The clipboard API needs https or localhost. Fall back to a hidden textarea.
+                const textarea = document.createElement("textarea");
+                textarea.value = iniText;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand("copy");
+                textarea.remove();
+            }
+            button.textContent = "Copied";
+            setTimeout(() => { button.textContent = "Copy"; }, 1500);
+        });
+
+        document.getElementById("downloadButton").addEventListener("click", () => {
+            const url = URL.createObjectURL(new Blob([iniText], { type: "text/plain" }));
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = iniFilename;
+            link.click();
+            URL.revokeObjectURL(url);
+        });
+
         document.getElementById("uploadForm").addEventListener("submit", async (e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
@@ -172,6 +237,10 @@
             document.getElementById("outputCard").style.display = "block";
             document.getElementById("outputHeader").textContent = `Generated INI Output (${result.filename})`;
             document.getElementById("iniOutput").textContent = result.ini_text;
+
+            // "CAAA1.csv" downloads as "CAAA1.ini"
+            iniText = result.ini_text;
+            iniFilename = result.filename.replace(/\.[^.]*$/, "") + ".ini";
         });
     </script>
 </body>
