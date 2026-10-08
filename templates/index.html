@@ -91,6 +91,14 @@
             background-color: var(--accent-hover);
         }
 
+        #warningsList {
+            margin: 0;
+            padding-left: 1.25rem;
+            color: #e3b341;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
         pre {
             background-color: var(--input-bg);
             padding: 1.25rem;
@@ -119,6 +127,11 @@
             </form>
         </div>
 
+        <div class="card" id="warningsCard" style="display: none;">
+            <label>Needs Manual Review</label>
+            <ul id="warningsList"></ul>
+        </div>
+
         <div class="card" id="outputCard" style="display: none;">
             <label id="outputHeader">Generated INI Content</label>
             <pre id="iniOutput"></pre>
@@ -136,6 +149,26 @@
             });
 
             const result = await response.json();
+            const warningsCard = document.getElementById("warningsCard");
+            const warningsList = document.getElementById("warningsList");
+            warningsList.innerHTML = "";
+
+            if (!response.ok) {
+                document.getElementById("outputCard").style.display = "none";
+                warningsCard.style.display = "block";
+                const li = document.createElement("li");
+                li.textContent = result.error;
+                warningsList.appendChild(li);
+                return;
+            }
+
+            (result.warnings || []).forEach((warning) => {
+                const li = document.createElement("li");
+                li.textContent = warning;
+                warningsList.appendChild(li);
+            });
+            warningsCard.style.display = result.warnings && result.warnings.length ? "block" : "none";
+
             document.getElementById("outputCard").style.display = "block";
             document.getElementById("outputHeader").textContent = `Generated INI Output (${result.filename})`;
             document.getElementById("iniOutput").textContent = result.ini_text;

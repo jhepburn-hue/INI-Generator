@@ -9,3 +9,16 @@ __pycache__/
 
 .DS_Store
 Thumbs.db
+.pytest_cache/
+
+# Company and customer data. Never commit these.
+private/
+tests/fixtures/
+tests/known_differences.py
+*.xlsx
+Downloaded_Configs/
+v[0-9]*.[0-9]*.[0-9]*/
+
+# Local tool settings
+.claude/
+.env

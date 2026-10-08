@@ -1,0 +1,151 @@
+{
+  "default_tci": "0ABCDE",
+  "keysets": {
+    "manufacturer_keyset": "Lk00009",
+    "families": [
+      "1",
+      "5"
+    ],
+    "last_separate_mobile_keyset": 9999,
+    "test_mobile_keysets": [
+      {
+        "pattern": "mobiledemo",
+        "keys": {
+          "slot13": "MobileDemo:km",
+          "slot14": "MobileDemo:kc"
+        }
+      }
+    ]
+  },
+  "ble_names": [
+    {
+      "pattern": "example",
+      "name": "EXMP"
+    }
+  ],
+  "mobile_keysets": {
+    "example transport": {
+      "requires_credentials": true,
+      "keys": {
+        "slot13": "Ck99999:KM2",
+        "slot14": "Ck99999:KC2"
+      }
+    },
+    "zero transport": {
+      "requires_credentials": false,
+      "keys": {
+        "slot03": "GENERIC:ZEROS_KEY",
+        "slot04": "GENERIC:ZEROS_KEY",
+        "slot13": "GENERIC:ZEROS_KEY",
+        "slot14": "GENERIC:ZEROS_KEY"
+      }
+    }
+  },
+  "keyword_apps": [
+    {
+      "name": "Example Variant App",
+      "pattern": "examplevariant",
+      "per_cell": true,
+      "variants": [
+        {
+          "pattern": "mfc|classic",
+          "settings": {
+            "rfid/hf/app/example/classic": {
+              "enabled": "true",
+              "se_key_nb": "30"
+            }
+          },
+          "keys": {
+            "slot30": "EXAMPLE:MFC"
+          }
+        },
+        {
+          "pattern": "mfd|desfire",
+          "settings": {
+            "rfid/hf/app/example/desfire": {
+              "enabled": "true",
+              "se_key_nb": "31"
+            }
+          },
+          "keys": {
+            "slot31": "EXAMPLE:MFD"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Example App",
+      "pattern": "\\bexampleapp\\b",
+      "settings": {
+        "rfid/hf/app/example": {
+          "enabled": "true",
+          "se_key_nb": "20"
+        }
+      },
+      "keys": {
+        "slot20": "EXAMPLE:KEY"
+      }
+    },
+    {
+      "name": "Example Manual App",
+      "pattern": "manual\\s*app",
+      "settings": {
+        "rfid/hf/app/example/manual": {
+          "enabled": "true",
+          "se_key_nb": "30"
+        }
+      },
+      "warning": "Example Manual App is enabled. Set its key in keys slot30 manually."
+    }
+  ],
+  "customer_profiles": [
+    {
+      "name": "Example Customer",
+      "config_prefix": "EX",
+      "settings": {
+        "rfid/hf/app/nexpacs": {
+          "enabled": "true",
+          "app_id": "\"ABCDEF\"",
+          "se_key_nb": "30"
+        }
+      },
+      "keys": {
+        "slot30": "{keyset}:APPVK"
+      }
+    }
+  ],
+  "wallet_overrides": [
+    {
+      "name": "Example Wallet",
+      "config_name_pattern": "^CEXW\\d",
+      "mention_pattern": "examplewallet",
+      "exclude_pattern": "compat|backward",
+      "settings": {
+        "rfid/hf/app/meridian": {
+          "enabled": "false"
+        },
+        "rfid/hf/app/wallet": {
+          "terminal_id": "\"0ABCDF\""
+        }
+      },
+      "keys": {
+        "slot15": "EXAMPLE_TEST:Kr0",
+        "slot16": "EXAMPLE_TEST:Kr1"
+      },
+      "if_mentioned": [
+        {
+          "pattern": "nexpacs",
+          "settings": {
+            "rfid/hf/app/nexpacs": {
+              "enabled": "true",
+              "se_key_nb": "19"
+            }
+          },
+          "keys": {
+            "slot19": "EXAMPLE_TEST:TEST"
+          }
+        }
+      ]
+    }
+  ]
+}

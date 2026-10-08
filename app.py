@@ -11,19 +11,25 @@ def index():
 def upload():
     if "csv_file" not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
-    
+
     file = request.files["csv_file"]
     if file.filename == "":
         return jsonify({"error": "No selected file"}), 400
 
     content = file.read()
     rows = parse_csv_file(content)
-    
-    ini_content = generate_ini(rows)
+    if not rows:
+        return jsonify({"error": "The CSV file is empty"}), 400
+
+    try:
+        ini_content, warnings = generate_ini(rows)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 500
 
     return jsonify({
         "filename": file.filename,
-        "ini_text": ini_content
+        "ini_text": ini_content,
+        "warnings": warnings
     })
 
 if __name__ == "__main__":
