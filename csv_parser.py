@@ -43,6 +43,9 @@ CSN_FORMATS = {
     "csn_75_bit_pcsc": "0x4B00",
 }
 
+# Dropdown values carried over from an older product. They have no current CSN format.
+OLD_CSN_FORMATS = {"csn_4001", "csn_4002", "csn_5002", "csn_5002_cl2", "csn_37_bit"}
+
 # Form CSN row -> csn keys it controls
 CSN_ROWS = {
     "MFC CSN": ["mifare_classic_format"],
@@ -345,11 +348,14 @@ def set_ble(form, config):
     config.set("mypass", "kc2_se_slot_nb", "14")
     config.set("mypass", "allow_credentials", ini_bool(credentials))
 
-    legacy_value = form.get_by_prefix("Legacy Credentials")
-    legacy_credentials = (legacy_value or "").lower() in ("on", "yes", "enabled")
+    # Some customers' legacy mobile apps also need secure_transactions off. That lives in their
+    # customer profile ("if_legacy_credentials").
+    legacy_credentials = has_legacy_credentials(form)
     if legacy_credentials:
-        config.set("ble/configure", "secure_transactions", "false")
         config.set("ble/configure", "allow_credentials", "true")
+        ble_name_entry = next((e for e in PROFILES["ble_names"] if e["name"] == custom_name), None)
+        if ble_name_entry and ble_name_entry.get("if_legacy_credentials"):
+            apply_rule(config, ble_name_entry["if_legacy_credentials"], None)
 
     # Legacy credential configs leave the MyPass NFC application off
     config.set("rfid/hf/app/mypass", "enabled", ini_bool(credentials and not legacy_credentials))
@@ -359,6 +365,10 @@ def set_ble(form, config):
     # all_keys enables MyPass keyset 1 and 2. Keyset 2 lives in keys slot13/slot14.
     keyset_2 = "slot13" in config.values.get("keys", {})
     config.set("mypass", "all_keys", ini_bool(keyset_2))
+
+
+def has_legacy_credentials(form):
+    return (form.get_by_prefix("Legacy Credentials") or "").lower() in ("on", "yes", "enabled")
 
 
 def set_ble_name(form, config):
@@ -447,6 +457,9 @@ def set_leaf(form, config, keyset_id):
     config.set("rfid/hf/app/leaf/desfire", "enabled", "true")
 
     config.set("rfid/hf/app/leaf/desfire/1", "enabled", ini_bool(leaf_si))
+    # LEAF Verified (DUOX OpenID) is on whenever LEAF Si is on
+    if leaf_si:
+        config.set("rfid/hf/app/leaf/duox/openid", "enabled", "true")
     config.set("rfid/hf/app/leaf/desfire/1", "app_id", quoted("F51CD8"))
     config.set("rfid/hf/app/leaf/desfire/1", "card_key_nb", "2")
     config.set("rfid/hf/app/leaf/desfire/1", "se_key_nb", "2")
@@ -559,7 +572,11 @@ def set_csn(form, config):
         if label in rows_on:
             format_name = form.get(label, index=1) or ""
             csn_format = CSN_FORMATS.get(format_name.lower())
-            if csn_format is None:
+            if format_name.lower() in OLD_CSN_FORMATS:
+                config.warn(f"{label} format '{format_name}' is an old code from a previous product. "
+                            "Pick a current CSN format. Left as-is (0x0000).")
+                csn_format = "0x0000"
+            elif csn_format is None:
                 config.warn(f"{label} format '{format_name}' has no known mapping. Left as-is (0x0000).")
                 csn_format = "0x0000"
         else:
@@ -660,6 +677,8 @@ def set_custom_hf(form, config, keyset_id):
     profile = find_customer_profile(form)
     if profile:
         apply_rule(config, profile, keyset_id)
+        if has_legacy_credentials(form) and profile.get("if_legacy_credentials"):
+            apply_rule(config, profile["if_legacy_credentials"], keyset_id)
         detected.append(profile["name"])
 
     nexpacs_enabled = config.values.get("rfid/hf/app/nexpacs", {}).get("enabled") == "true"
@@ -727,8 +746,39 @@ def build_config(rows):
     set_lf(form, config)
     set_custom_hf(form, config, keyset_id)
     set_nfc_protocols(config, csn_rows_on)
+    set_notes_ini(form, config)
 
     return config
+
+
+def set_notes_ini(form, config):
+    # Engineers sometimes write INI settings straight into the form notes, e.g. panel-specific
+    # [osdp] flags. They are applied last, so they win over every other rule.
+    defaults = load_defaults() if os.path.exists(DEFAULT_INI_PATH) else None
+    applied = []
+
+    for cell in form.text_cells():
+        if not re.search(r"^\s*\[[\w/]+\]\s*$", cell, re.M):
+            continue
+        section = None
+        for line in cell.splitlines():
+            line = line.strip()
+            header = re.fullmatch(r"\[([\w/]+)\]", line)
+            if header:
+                section = header.group(1)
+                continue
+            setting = re.fullmatch(r"(\w+)\s*=\s*(.+?)\s*(;.*)?", line)
+            if not section or not setting:
+                continue
+            key, value = setting.group(1), setting.group(2)
+            if defaults is not None and key not in defaults.get(section, {}):
+                config.warn(f"The form notes set [{section}] {key}, which is not in settings_default.ini. Ignored.")
+                continue
+            config.set(section, key, value)
+            applied.append(f"[{section}] {key} = {value}")
+
+    if applied:
+        config.warn(f"Applied {len(applied)} INI settings written in the form notes: {'; '.join(applied)}.")
 
 
 def render_ini(defaults, overrides):

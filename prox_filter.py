@@ -54,6 +54,8 @@ BIT_MAPS = {
     "W37-3": {"FC": (1, 14), "BID": (15, 32)},
     "W37-4": {"FC": (3, 7), "BID": (8, 36)},
     "W37-5": {"FC": (2, 7), "BID": (8, 36)},
+    # Assumed: a reference filter confirms BID = bits 7-36. FC is taken as the remaining bits 2-6.
+    "W37-6": {"FC": (2, 6), "BID": (7, 36)},
 
     "W38-1": {"FC": (2, 9), "BID": (10, 37)},
     "W38-2": {"FC": (1, 8), "BID": (9, 38)},

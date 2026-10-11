@@ -58,6 +58,7 @@ def credentials_with_custom_mobile(mobile_notes):
     ("Filter 37-4, FC 11.", "equal", "37", "07C0000000", "02C0000000"),                       # no "W"
     ("Filter W35-0 BID ≥ 400,000", "greater_or_equal", "35", "00001FFFFE", "00000C3500"),     # "≥"
     ("Filter all 37-bit prox credentials", "greater_or_equal", "37", "1FFFFFFFFF", "0000000000"),
+    ("Ignore W37-6 with BID >= 500,000", "greater_or_equal", "37", "007FFFFFFE", "00000F4240"),  # assumed layout
 ])
 def test_prox_filter_descriptions(description, function, bit_len, mask, filter_value):
     settings, problem = build_prox_filter(description)
@@ -73,7 +74,7 @@ def test_prox_filter_descriptions(description, function, bit_len, mask, filter_v
 
 @pytest.mark.parametrize("description", [
     "Filter all prox cards except for 40-bit and all 1's",  # exceptions cannot be one mask/value
-    "Ignore W25-0 with FC 109",                             # format not in BIT_MAPS
+    "Ignore W25-0 with FC 5",                               # format not in BIT_MAPS
     "KC1 of Lk19999",                                       # no format at all
     "Ignore W48-0 with FC 5",                               # longer than the 40-bit register
 ])
@@ -213,8 +214,21 @@ def test_ble_credentials_enable_mypass(functionality):
 @pytest.mark.parametrize("label", ["Legacy Credentials", "Legacy Credentials (any partner names)"])
 def test_legacy_credentials(label):
     config = generate(("BLE Functionality", "Admin + Credentials"), (label, "On"))
-    assert value(config, "ble/configure", "secure_transactions") == "false"
+    assert value(config, "ble/configure", "allow_credentials") == "true"
     assert value(config, "rfid/hf/app/mypass", "enabled") == "false"
+    # Secure transactions stay on unless the customer's legacy mobile app needs them off
+    assert value(config, "ble/configure", "secure_transactions") is None
+
+
+def test_legacy_mobile_app_from_customer_profile():
+    config = build_config(make_rows(("Config Name", "CEX9"), ("Legacy Credentials", "On")))
+    assert value(config, "ble/configure", "secure_transactions") == "false"
+    assert value(build_config(make_rows(("Config Name", "CEX9"))), "ble/configure", "secure_transactions") is None
+
+
+def test_legacy_mobile_app_from_ble_name():
+    config = generate(("BLE Advertising Config", "Example (EXMP)"), ("Legacy Credentials", "On"))
+    assert value(config, "ble/configure", "secure_transactions") == "false"
 
 
 def test_transport_keyset_and_all_keys():
@@ -450,3 +464,47 @@ def test_bluetooth_key_pair_1_by_default():
     config = credentials_with_custom_mobile("Mk59995")
     assert value(config, "keys", "slot03") is None
     assert value(config, "keys", "slot13") == "Lk59995:Mkm"
+
+
+# Coworker answers (round 5)
+
+def test_leaf_verified_follows_leaf_si():
+    config = generate(("Leaf Si Application (Kv1)", "Leaf Si"))
+    assert value(config, "rfid/hf/app/leaf/duox/openid", "enabled") == "true"
+    config = generate(("Custom Keyset (LEAF Cc)", "Enabled"), ("Keyset ID (LkXXXXX)", "Lk19991"),
+                      ("Leaf Si Application (Kv1)", "None"), ("Leaf Cc Application (Kc1)", "Leaf Cc"))
+    assert value(config, "rfid/hf/app/leaf/duox/openid", "enabled") is None
+
+
+@pytest.mark.parametrize("old_code", ["CSN_4001", "CSN_4002", "CSN_5002", "CSN_5002_CL2", "CSN_37_BIT"])
+def test_old_csn_codes_warn(old_code):
+    config = generate(("MFC CSN", "On", old_code))
+    assert value(config, "rfid/hf/app/csn", "mifare_classic_format") == "0x0000"
+    assert any("old code" in w for w in config.warnings)
+
+
+def test_customer_profile_sets_keypad_and_wiring():
+    config = build_config(make_rows(("Config Name", "CEX9")))
+    assert value(config, "keypad", "keymap_kp1") == '"9"'
+    assert value(config, "wiegand", "red_ctrl_mode") == '"blue"'
+
+
+def test_keyword_app_sets_panel_timing():
+    assert value(generate(notes("ExampleApp")), "wiegand", "pulse_duration_us") == "60"
+
+
+def test_ini_settings_in_notes_are_applied():
+    config = generate(notes("Unique OSDP settings for this panel\n\n[osdp]\n; a comment\ncomset_kills_sc = true\nsc_exclusive = true"))
+    assert value(config, "osdp", "comset_kills_sc") == "true"
+    assert value(config, "osdp", "sc_exclusive") == "true"
+    assert any("Applied 2 INI settings" in w for w in config.warnings)
+
+
+def test_ini_settings_in_notes_win_over_rules():
+    config = generate(("Idle LED", "Red"), notes("[av]\nidle_color = \"amber\""))
+    assert value(config, "av", "idle_color") == '"amber"'
+
+
+def test_plain_notes_are_not_ini():
+    config = generate(notes("Customer uses idle = red on site [see drawing]"))
+    assert not any("INI settings" in w for w in config.warnings)

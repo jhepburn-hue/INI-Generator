@@ -20,7 +20,14 @@
   "ble_names": [
     {
       "pattern": "example",
-      "name": "EXMP"
+      "name": "EXMP",
+      "if_legacy_credentials": {
+        "settings": {
+          "ble/configure": {
+            "secure_transactions": "false"
+          }
+        }
+      }
     }
   ],
   "mobile_keysets": {
@@ -80,6 +87,9 @@
         "rfid/hf/app/example": {
           "enabled": "true",
           "se_key_nb": "20"
+        },
+        "wiegand": {
+          "pulse_duration_us": "60"
         }
       },
       "keys": {
@@ -107,10 +117,24 @@
           "enabled": "true",
           "app_id": "\"ABCDEF\"",
           "se_key_nb": "30"
+        },
+        "keypad": {
+          "keymap_kp1": "\"9\"",
+          "keymap_kp9": "\"1\""
+        },
+        "wiegand": {
+          "red_ctrl_mode": "\"blue\""
         }
       },
       "keys": {
         "slot30": "{keyset}:APPVK"
+      },
+      "if_legacy_credentials": {
+        "settings": {
+          "ble/configure": {
+            "secure_transactions": "false"
+          }
+        }
       }
     }
   ],
