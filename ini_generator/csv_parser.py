@@ -4,9 +4,9 @@ import json
 import os
 import re
 
-from config_ids import PRIVATE_DIR, lookup_config_id
-from ini_checks import DEFAULT_INI_PATH, check_ini
-from prox_filter import build_prox_filter
+from .config_ids import PRIVATE_DIR, lookup_config_id
+from .ini_checks import DEFAULT_INI_PATH, check_ini
+from .prox_filter import build_prox_filter
 
 SUPPORTED_COLORS = ["off", "red", "green", "blue", "amber", "magenta", "white"]
 

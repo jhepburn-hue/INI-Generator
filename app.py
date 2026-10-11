@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-from csv_parser import parse_csv_file, generate_ini
+from ini_generator.csv_parser import parse_csv_file, generate_ini
 
 app = Flask(__name__)
 

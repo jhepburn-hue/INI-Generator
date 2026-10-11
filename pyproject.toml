@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools==75.8.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ini-generator"
+version = "0.1.0"
+description = "Turns reader configuration form values into an INI settings file."
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.setuptools]
+packages = ["ini_generator"]

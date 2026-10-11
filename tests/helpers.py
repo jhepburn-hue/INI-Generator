@@ -1,7 +1,7 @@
 import os
 import re
 
-from csv_parser import DEFAULT_INI_PATH, generate_ini, load_defaults, parse_csv_file
+from ini_generator.csv_parser import DEFAULT_INI_PATH, generate_ini, load_defaults, parse_csv_file
 
 # Fixtures hold customer data and are not committed. Build them with tools/build_test_fixtures.py,
 # or point INI_FIXTURES_DIR at a folder that has forms/ and reference_ini/.

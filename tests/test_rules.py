@@ -7,9 +7,9 @@ import os
 
 import pytest
 
-import csv_parser
-from csv_parser import CSN_FORMATS, Form, build_config, get_keyset_id, load_profiles
-from prox_filter import build_prox_filter
+from ini_generator import csv_parser
+from ini_generator.csv_parser import CSN_FORMATS, Form, build_config, get_keyset_id, load_profiles
+from ini_generator.prox_filter import build_prox_filter
 
 EXAMPLE_PROFILES = os.path.join(os.path.dirname(__file__), "..", "customer_profiles.example.json")
 FAKE_CONFIG_IDS = {"CXAA1": 206, "CXBB4": 170}

@@ -1,7 +1,9 @@
 import os
 import re
 
-DEFAULT_INI_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "private", "settings_default.ini")
+from .config_ids import PRIVATE_DIR
+
+DEFAULT_INI_PATH = os.path.join(PRIVATE_DIR, "settings_default.ini")
 
 # Options listed in settings_default.ini comments apply to the next key only. These keys share
 # the list of the key above them.

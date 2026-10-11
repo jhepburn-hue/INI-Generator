@@ -36,7 +36,7 @@ Company and customer data is never committed. Create a `private/` folder with th
 To build `config_ids.csv` from a configurations report:
 
 ```
-venv/bin/python config_ids.py <config_ids_report.txt>
+venv/bin/python ini_generator/config_ids.py <config_ids_report.txt>
 ```
 
 Without `customer_profiles.json` the app still runs, but customer and partner apps are not generated and a warning says so.
@@ -98,14 +98,37 @@ Tests that need private data skip when it is missing, so a fresh clone runs only
 
    A listed difference that no longer happens also fails the test. 
 
+## Using it from another app
+
+The generator is an installable package (`ini_generator`). Another app, such as CALIGA, installs it pinned to a commit:
+
+```
+ini-generator @ git+https://github.com/jhepburn-hue/INI-Generator.git@<commit>
+```
+
+Set `INI_GENERATOR_PRIVATE_DIR` to the folder holding `settings_default.ini` and `customer_profiles.json` before importing it. Without it, the package looks for `private/` at the repo root, which only exists in a clone.
+
+```python
+import os
+os.environ["INI_GENERATOR_PRIVATE_DIR"] = "/path/to/private"
+
+from ini_generator import generate_ini
+
+rows = [["Config Name", "", "CXY1"], ["Idle LED", "", "Blue"], ["MFC CSN", "", "On", "32-bit msb"]]
+ini_text, warnings = generate_ini(rows)
+```
+
+`rows` use the same layout as the CSV form: a label, then its value in the next few cells.
+
 ## Project layout
 
 ```
 app.py                          Flask app (upload page and /upload endpoint)
-csv_parser.py                   Form parsing and the form-to-INI rules
-prox_filter.py                  Prox filter descriptions to filter mask/value
-ini_checks.py                   Validation of generated INIs
-config_ids.py                   Config ID lookup and report import
+ini_generator/csv_parser.py     Form parsing and the form-to-INI rules
+ini_generator/prox_filter.py    Prox filter descriptions to filter mask/value
+ini_generator/ini_checks.py     Validation of generated INIs
+ini_generator/config_ids.py     Config ID lookup and report import
+pyproject.toml                  Package definition
 customer_profiles.example.json  Format of private/customer_profiles.json
 templates/index.html            Upload page
 tools/build_test_fixtures.py    Builds test fixtures from workbooks

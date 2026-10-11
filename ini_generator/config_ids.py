@@ -3,8 +3,12 @@ import os
 import re
 import sys
 
-# Company data that is never committed (see .gitignore)
-PRIVATE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "private")
+# Company data that is never committed (see .gitignore). Defaults to private/ at the repo root.
+# INI_GENERATOR_PRIVATE_DIR points elsewhere, e.g. when another app installs this package.
+# It's read at import time, so set it before importing ini_generator.
+PRIVATE_DIR = os.environ.get("INI_GENERATOR_PRIVATE_DIR") or os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "private"
+)
 CONFIG_IDS_PATH = os.path.join(PRIVATE_DIR, "config_ids.csv")
 
 
