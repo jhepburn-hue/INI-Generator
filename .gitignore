@@ -10,6 +10,8 @@ __pycache__/
 .DS_Store
 Thumbs.db
 .pytest_cache/
+build/
+*.egg-info/
 
 # Company and customer data. Never commit these.
 private/

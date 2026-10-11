@@ -17,7 +17,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from config_ids import normalize_config_name  # noqa: E402
+from ini_generator.config_ids import normalize_config_name  # noqa: E402
 
 NS = {
     "m": "http://schemas.openxmlformats.org/spreadsheetml/2006/main",

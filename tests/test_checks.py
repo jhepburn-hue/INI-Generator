@@ -4,9 +4,9 @@ import re
 
 import pytest
 
-from csv_parser import DEFAULT_INI_PATH, build_config, generate_ini, load_defaults
+from ini_generator.csv_parser import DEFAULT_INI_PATH, build_config, generate_ini, load_defaults
 from helpers import form_names, read_form
-from ini_checks import check_ini, check_key_slots, check_value, effective_values, load_allowed_values
+from ini_generator.ini_checks import check_ini, check_key_slots, check_value, effective_values, load_allowed_values
 
 # The checks read settings_default.ini, which is private company data
 pytestmark = pytest.mark.skipif(not os.path.exists(DEFAULT_INI_PATH), reason="Needs private/settings_default.ini.")
@@ -81,7 +81,7 @@ def test_mypass_keyset_2_checked_only_with_all_keys():
 
 
 def test_card_key_must_match_key_number():
-    from ini_checks import check_leaf_card_keys
+    from ini_generator.ini_checks import check_leaf_card_keys
     overrides = {"rfid/hf/app/leaf/desfire/2": {"enabled": "true", "card_key_nb": "8", "se_key_nb": "11"},
                  "keys": {"slot11": "Lk19991:Kc1"}}
     problems = check_leaf_card_keys(effective_values(DEFAULTS, overrides))
@@ -92,7 +92,7 @@ def test_card_key_must_match_key_number():
 
 
 def test_unknown_keyset_family_is_flagged():
-    from ini_checks import check_keyset_families
+    from ini_generator.ini_checks import check_keyset_families
     families = ["1", "5"]
     problems = check_keyset_families({"keys": {"slot11": "Lk39991:Kc8"}}, families)
     assert problems == ["[keys] slot11 = Lk39991:Kc8: Lk3XXXX is not a known keyset family"]
